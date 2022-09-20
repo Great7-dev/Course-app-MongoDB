@@ -13,6 +13,7 @@ router.get('/login',(req,res)=>{
 router.get('/', Homepage)
 
 router.get('/dashboard',(req,res)=>{
+
     res.render("dashboard")
 })
 

@@ -17,12 +17,12 @@ export async function Users(req:Request | any, res:Response, next:NextFunction) 
             })
         }
         const record = await Login.create({...req.body, userId:verified.id})
-        res.status(201);
-        res.json({
-            message:"You have successfully enrolled your course.",
-            record
-        })
-        // res.redirect('/users/dashboard')
+        // res.status(201);
+        // res.json({
+        //     message:"You have successfully enrolled your course.",
+        //     record
+        // })
+        res.redirect('/users/dashboard')
     }catch(err){
         console.log(err)
         res.status(500).json({
@@ -46,7 +46,30 @@ export async function Users(req:Request | any, res:Response, next:NextFunction) 
         // ('index', {
         //     title: "courses",
         //    message:'Here are your courses',
-        //    data: record.rows
+        //    data: record.
+        // })
+    }catch(error){
+           res.status(500).json({
+            msg:'failed to read all',
+             route: '/getCourses'
+           })
+    }
+  }
+  export async function getCoursesForUser(req:Request, res:Response, next:NextFunction){
+    try{
+        // let userID = req.user.id
+        // const limit = req.query.limit as number | undefined
+        // const offset = req.query.offset as number| undefined
+        const record = await Login.find({});
+        res.status(200);
+        res.json({
+            msg:"Here are your courses",
+            count:record
+        })
+        // ('index', {
+        //     title: "courses",
+        //    message:'Here are your courses',
+        //    data: record.
         // })
     }catch(error){
            res.status(500).json({
@@ -84,24 +107,25 @@ export async function UpdateCourses(req:Request, res:Response, next:NextFunction
                 Error:validateResult.error.details[0].message
             })
         }
-        const record = await Login.findByIdAndUpdate({id})
+        const record = await Login.findById(id)
         if(!record){
             res.status(404).json({
                       Error:"cannot find course",
                 })   
         }
         
-         const updaterecord = await record?.update({
+         const updaterecord = await Login.findByIdAndUpdate(id,{
             course: course,
             description:description,
             image:image,
             price:price
-         })
-         res.status(200).json({
-            message: 'you have successfully updated your course',
-            record: updaterecord 
-         })
-        // res.redirect('/users/dashboard')
+         },
+         {new:true})
+        //  res.status(200).json({
+        //     message: 'you have successfully updated your course',
+        //     record: updaterecord 
+        //  })
+        res.redirect('/users/dashboard')
     }catch(error){
            res.status(500).json({
             msg:'failed to update',
@@ -114,18 +138,19 @@ export async function UpdateCourses(req:Request, res:Response, next:NextFunction
 export async function DeleteCourses(req:Request, res:Response, next:NextFunction){
     try{
         const { id } = req.params
-        const record = await Login.find({id})
+        const record = await Login.findById(id)
         if(!record){
             res.status(404).json({
                 message: "does not exist"
             })
         }
+        await Login.findByIdAndDelete(id)
     //    const deletedRecord = await record?.delete();
-    //    res.render("dashboardrefresh")
-       res.status(200).json({
-        msg: 'Course has been deleted successfully',
-        record
-       })
+       res.render("dashboardrefresh")
+    //    res.status(200).json({
+    //     msg: 'Course has been deleted successfully',
+    //     record
+    //    })
     }catch(error){
            res.status(500).json({
             msg:'failed to delete',
@@ -139,11 +164,11 @@ export async function getUniqueCourse(req:Request, res:Response, next:NextFuncti
     try{
       const id = req.params
       const record = await Login.findOne({id})
-        res.status(200).json({
-            msg:"Here is your course",
-            record
-        })
-        // res.render('editcourse', {record:record})
+        // res.status(200).json({
+        //     msg:"Here is your course",
+        //     record
+        // })
+        res.render('editcourse', {record:record})
     }catch(error){
            res.status(500).json({
             msg:'failed to read single course',

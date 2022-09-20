@@ -16,15 +16,15 @@ export async function RegisterUser(req:Request, res:Response, next:NextFunction)
                 Error:validateResult.error.details[0].message
             })
         }
-        const duplicatEmail =  await User.findOne({where: {email: req.body.email}})
+        const duplicatEmail =  await User.findOne({email: req.body.email})
         if(duplicatEmail){
-            res.status(409).json({
+            return res.status(409).json({
                 msg:"Email has be used already"
             })
         }
-        const duplicatePhone = await User.findOne({where:{phonenumber: req.body.phonenumber}})
+        const duplicatePhone = await User.findOne({phonenumber: req.body.phonenumber})
         if(duplicatePhone){
-            res.status(409).json({
+           return res.status(409).json({
                 msg: 'Phone number has been used already'
             })
         }
@@ -36,13 +36,12 @@ export async function RegisterUser(req:Request, res:Response, next:NextFunction)
             phonenumber:req.body.phonenumber,
             password:passwordHash
          })
-        res.status(201);
-        res.json({
+       return res.status(201).json({
             message:"You have successfully signed up.",
             record
         })
     }catch(err){
-        res.status(500).json({
+        return res.status(500).json({
             message:'failed to register',
             route:'/register'
 
@@ -60,7 +59,7 @@ export async function RegisterUser(req:Request, res:Response, next:NextFunction)
                 Error:validateResult.error.details[0].message
             })
         }
-        const user =  await User.findOne({where: {email: req.body.email}}) as unknown as {[key:string]:string};
+        const user =  await User.findOne({email: req.body.email}) as unknown as {[key:string]:string};
 
        const {id} = user
        const token = generateToken({id})
@@ -73,14 +72,14 @@ export async function RegisterUser(req:Request, res:Response, next:NextFunction)
          })
        }
        if(validUser){
-        // res.render('loginrefresh')
-       res.status(200)
-       res.json({message: "login successful",
-          token,
-          user   
-         })
+        res.render('loginrefresh')
+    //    res.status(200)
+    //    res.json({message: "login successful",
+    //       token,
+    //       user   
+    //      })
        }
-    }catch(err){
+    } catch(err){
         res.status(500)
         res.json({
             message:'failed to login',
@@ -105,33 +104,21 @@ export async function RegisterUser(req:Request, res:Response, next:NextFunction)
   
       const userId = req.cookies.id;
   
-      const record = (await User.findOne({
+      const record= (await User.findOne({id: userId})) as unknown as { [key: string]: string };
+  console.log("record",record)
+  const user=record
   
-        where: { id: userId },
-  
-        include: [{ model: Login, as: "courses" }],
-  
-      })) as unknown as { [key: string]: string };
-  
-  const user=record.courses
-  
-    //   res.render("dashboard", { user:user });
-    res.status(200).json({
-        msg:"You have successfully gotten your data",
-        count: record.count,
-        courses:{user}
-    })
-  
+      res.render("dashboard", { user: user });
+    // res.status(200).json({
+    //     msg:"You have successfully gotten your data",
+    //     count: record.count,
+    //     courses:{user}
+    // })
     } catch (err) {
-        console.log(err);
-        
-  
+        console.log("err",err);
       res.status(500).json({
-  
         msg: "failed to login",
-  
         route: "/login",
-  
       });
   
     }

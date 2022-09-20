@@ -21,4 +21,4 @@ const LoginInstance = new mongoose.Schema({
 {
     timestamps:true
 })
-export const Login = mongoose.model<LoginAttributes>('Login', LoginInstance);
+export const Login = mongoose.model('Login', LoginInstance);

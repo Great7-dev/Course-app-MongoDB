@@ -82,7 +82,7 @@
           signup_error.innerHTML = response.data.message
         }
       }).catch(err=>{
-        console.log(err.response.data.message);
+        console.log({error: err});
         signup_error.innerHTML = err.response.data.message
       })
       

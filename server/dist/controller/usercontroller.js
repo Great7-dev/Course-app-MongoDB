@@ -8,7 +8,6 @@ const uuid_1 = require("uuid");
 const utils_1 = require("../utils/utils");
 const userModel_1 = require("../model/userModel");
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const login_1 = require("../model/login");
 async function RegisterUser(req, res, next) {
     const id = (0, uuid_1.v4)();
     try {
@@ -18,15 +17,15 @@ async function RegisterUser(req, res, next) {
                 Error: validateResult.error.details[0].message
             });
         }
-        const duplicatEmail = await userModel_1.User.findOne({ where: { email: req.body.email } });
+        const duplicatEmail = await userModel_1.User.findOne({ email: req.body.email });
         if (duplicatEmail) {
-            res.status(409).json({
+            return res.status(409).json({
                 msg: "Email has be used already"
             });
         }
-        const duplicatePhone = await userModel_1.User.findOne({ where: { phonenumber: req.body.phonenumber } });
+        const duplicatePhone = await userModel_1.User.findOne({ phonenumber: req.body.phonenumber });
         if (duplicatePhone) {
-            res.status(409).json({
+            return res.status(409).json({
                 msg: 'Phone number has been used already'
             });
         }
@@ -38,14 +37,13 @@ async function RegisterUser(req, res, next) {
             phonenumber: req.body.phonenumber,
             password: passwordHash
         });
-        res.status(201);
-        res.json({
+        return res.status(201).json({
             message: "You have successfully signed up.",
             record
         });
     }
     catch (err) {
-        res.status(500).json({
+        return res.status(500).json({
             message: 'failed to register',
             route: '/register'
         });
@@ -61,7 +59,7 @@ async function LoginUser(req, res, next) {
                 Error: validateResult.error.details[0].message
             });
         }
-        const user = await userModel_1.User.findOne({ where: { email: req.body.email } });
+        const user = await userModel_1.User.findOne({ email: req.body.email });
         const { id } = user;
         const token = (0, utils_1.generateToken)({ id });
         res.cookie('mytoken', token, { httpOnly: true });
@@ -73,12 +71,12 @@ async function LoginUser(req, res, next) {
             });
         }
         if (validUser) {
-            // res.render('loginrefresh')
-            res.status(200);
-            res.json({ message: "login successful",
-                token,
-                user
-            });
+            res.render('loginrefresh');
+            //    res.status(200)
+            //    res.json({message: "login successful",
+            //       token,
+            //       user   
+            //      })
         }
     }
     catch (err) {
@@ -93,20 +91,18 @@ exports.LoginUser = LoginUser;
 async function defaultView(req, res, next) {
     try {
         const userId = req.cookies.id;
-        const record = (await userModel_1.User.findOne({
-            where: { id: userId },
-            include: [{ model: login_1.Login, as: "courses" }],
-        }));
-        const user = record.courses;
-        //   res.render("dashboard", { user:user });
-        res.status(200).json({
-            msg: "You have successfully gotten your data",
-            count: record.count,
-            courses: { user }
-        });
+        const record = (await userModel_1.User.findOne({ id: userId }));
+        console.log("record", record);
+        const user = record;
+        res.render("dashboard", { user: user });
+        // res.status(200).json({
+        //     msg:"You have successfully gotten your data",
+        //     count: record.count,
+        //     courses:{user}
+        // })
     }
     catch (err) {
-        console.log(err);
+        console.log("err", err);
         res.status(500).json({
             msg: "failed to login",
             route: "/login",
